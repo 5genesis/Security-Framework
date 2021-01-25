@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module metrics_formatter</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>metrics_formatter</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cthanasis%5Cdesktop%5C5g_anomaly_detection%5Cmetrics_formatter.py">c:\users\thanasis\desktop\5g_anomaly_detection\metrics_formatter.py</a></font></td></tr></table>
+    <p><tt>Format&nbsp;retrieved&nbsp;metrics&nbsp;from&nbsp;InfluxDB</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="logging.html">logging</a><br>
+</td><td width="25%" valign=top><a href="pandas.html">pandas</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-format5gCpuPercentage"><strong>format5gCpuPercentage</strong></a>(json_array, last_record)</dt><dd><tt>Receives&nbsp;percentage&nbsp;usage&nbsp;of&nbsp;RX/TX&nbsp;CPU.&nbsp;Calculate&nbsp;the&nbsp;rate&nbsp;of&nbsp;usage&nbsp;<br>
+between&nbsp;json_array&nbsp;and&nbsp;last_record.<br>
+&nbsp;<br>
+param&nbsp;json_array:&nbsp;JSON&nbsp;Array&nbsp;with&nbsp;percentage&nbsp;of&nbsp;RX/TX&nbsp;CPU.<br>
+param&nbsp;last_record:&nbsp;previous&nbsp;retrieved&nbsp;record&nbsp;from&nbsp;InfluxDB.<br>
+&nbsp;<br>
+return:&nbsp;percentage&nbsp;of&nbsp;RX/TX&nbsp;CPU&nbsp;and&nbsp;rate&nbsp;of&nbsp;usage.</tt></dd></dl>
+ <dl><dt><a name="-format5gNetworkBytes"><strong>format5gNetworkBytes</strong></a>(json_array, last_record)</dt><dd><tt>Receives&nbsp;bits&nbsp;of&nbsp;5G&nbsp;interface.<br>
+&nbsp;<br>
+param&nbsp;json_array:&nbsp;JSON&nbsp;Array&nbsp;with&nbsp;number&nbsp;of&nbsp;bites&nbsp;for&nbsp;5G&nbsp;interface.<br>
+param&nbsp;last_record:&nbsp;previous&nbsp;retrieved&nbsp;record&nbsp;from&nbsp;InfluxDB.<br>
+&nbsp;<br>
+return:&nbsp;Total&nbsp;number&nbsp;of&nbsp;bytes&nbsp;and&nbsp;rate&nbsp;of&nbsp;bytes&nbsp;for&nbsp;5G&nbsp;interface.</tt></dd></dl>
+ <dl><dt><a name="-formatCpuSecondsTotal"><strong>formatCpuSecondsTotal</strong></a>(json_array, last_record)</dt><dd><tt>Receives&nbsp;CPU&nbsp;seconds&nbsp;total.&nbsp;Filter&nbsp;CPU&nbsp;seconds,&nbsp;keeping&nbsp;only&nbsp;'user'&nbsp;mode.&nbsp;For&nbsp;both&nbsp;of&nbsp;the&nbsp;2<br>
+different&nbsp;CPUs&nbsp;calculate&nbsp;percentage&nbsp;usage&nbsp;using&nbsp;the&nbsp;time&nbsp;difference&nbsp;from&nbsp;the&nbsp;last_record&nbsp;param<br>
+and&nbsp;the&nbsp;difference&nbsp;of&nbsp;seconds&nbsp;in&nbsp;'user'&nbsp;mode.&nbsp;Also,&nbsp;based&nbsp;on&nbsp;last_record's&nbsp;percentage&nbsp;calculate<br>
+the&nbsp;rate&nbsp;of&nbsp;the&nbsp;percentage&nbsp;for&nbsp;each&nbsp;CPU&nbsp;separately,&nbsp;and&nbsp;aggregated.&nbsp;Finally,&nbsp;return&nbsp;json_array&nbsp;<br>
+in&nbsp;order&nbsp;to&nbsp;be&nbsp;used&nbsp;as&nbsp;last_record&nbsp;for&nbsp;the&nbsp;next&nbsp;retrieved&nbsp;metrics.<br>
+&nbsp;<br>
+param&nbsp;json_array:&nbsp;JSON&nbsp;Array&nbsp;with&nbsp;total&nbsp;cpu&nbsp;seconds&nbsp;in&nbsp;node.<br>
+param&nbsp;last_record:&nbsp;previous&nbsp;retrieved&nbsp;record&nbsp;from&nbsp;InfluxDB.<br>
+&nbsp;<br>
+return:&nbsp;json_array,&nbsp;features_core,&nbsp;features<br>
+json_array:&nbsp;input&nbsp;param<br>
+features_core:&nbsp;formatted&nbsp;percentage&nbsp;&amp;&nbsp;rate&nbsp;for&nbsp;mode&nbsp;user&nbsp;for&nbsp;both&nbsp;cpu&nbsp;0&nbsp;and&nbsp;1<br>
+features:&nbsp;aggregated&nbsp;formatted&nbsp;percentage&nbsp;&amp;&nbsp;rate&nbsp;for&nbsp;mode&nbsp;user</tt></dd></dl>
+ <dl><dt><a name="-formatMemoryFreeBytes"><strong>formatMemoryFreeBytes</strong></a>(json_array, last_record)</dt><dd><tt>Receives&nbsp;free&nbsp;bytes&nbsp;of&nbsp;available&nbsp;RAM.&nbsp;Total&nbsp;size&nbsp;of&nbsp;RAM&nbsp;is&nbsp;8228077568.0&nbsp;bytes.<br>
+Substracting&nbsp;from&nbsp;total&nbsp;size&nbsp;calculate&nbsp;the&nbsp;the&nbsp;used&nbsp;RAM,&nbsp;percentage&nbsp;of&nbsp;RAM&nbsp;used.<br>
+Using&nbsp;last_record&nbsp;calculate&nbsp;the&nbsp;rate&nbsp;of&nbsp;RAM&nbsp;usage.<br>
+&nbsp;<br>
+param&nbsp;json_array:&nbsp;JSON&nbsp;Array&nbsp;with&nbsp;number&nbsp;of&nbsp;free&nbsp;RAM&nbsp;bytes.<br>
+param&nbsp;last_record:&nbsp;previous&nbsp;retrieved&nbsp;record&nbsp;from&nbsp;InfluxDB.<br>
+&nbsp;<br>
+return:&nbsp;Used&nbsp;RAM,&nbsp;percentage&nbsp;of&nbsp;used&nbsp;RAM&nbsp;and&nbsp;rate&nbsp;of&nbsp;RAM&nbsp;usage.</tt></dd></dl>
+ <dl><dt><a name="-formatNetworkBytes"><strong>formatNetworkBytes</strong></a>(json_array, last_record)</dt><dd><tt>Receives&nbsp;bytes&nbsp;of&nbsp;all&nbsp;network&nbsp;interfaces.&nbsp;Filter&nbsp;them,&nbsp;and&nbsp;keep&nbsp;'enp1s0',&nbsp;'enp0s20u1'&nbsp;and&nbsp;'ppp0'<br>
+interfaces.&nbsp;It&nbsp;calculates&nbsp;using&nbsp;last_record&nbsp;bytes&nbsp;and&nbsp;bytes&nbsp;rate&nbsp;for&nbsp;each&nbsp;interface&nbsp;separately.&nbsp;<br>
+Also&nbsp;it&nbsp;calculates&nbsp;the&nbsp;total&nbsp;bytes&nbsp;and&nbsp;total&nbsp;rate&nbsp;aggregated&nbsp;from&nbsp;all&nbsp;three&nbsp;interfaces.<br>
+&nbsp;<br>
+param&nbsp;json_array:&nbsp;JSON&nbsp;Array&nbsp;with&nbsp;number&nbsp;of&nbsp;bytes&nbsp;in&nbsp;each&nbsp;interface.<br>
+param&nbsp;last_record:&nbsp;previous&nbsp;retrieved&nbsp;record&nbsp;from&nbsp;InfluxDB.<br>
+&nbsp;<br>
+return:&nbsp;features_interfaces,&nbsp;features.<br>
+features_interfaces:&nbsp;number&nbsp;of&nbsp;bytes&nbsp;and&nbsp;rate&nbsp;of&nbsp;bytes&nbsp;for&nbsp;each&nbsp;interface&nbsp;separately.<br>
+features:&nbsp;Total&nbsp;number&nbsp;of&nbsp;bytes&nbsp;and&nbsp;aggregated&nbsp;rate&nbsp;of&nbsp;bytes&nbsp;from&nbsp;the&nbsp;three&nbsp;used&nbsp;interfaces.</tt></dd></dl>
+</td></tr></table>
+</body></html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module find_anomalies</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>find_anomalies</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cthanasis%5Cdesktop%5C5g_anomaly_detection%5Cfind_anomalies.py">c:\users\thanasis\desktop\5g_anomaly_detection\find_anomalies.py</a></font></td></tr></table>
+    <p><tt>Main&nbsp;Module<br>
+&nbsp;<br>
+Program&nbsp;Execution&nbsp;Params:<br>
+param&nbsp;--mode:&nbsp;Mode&nbsp;to&nbsp;run&nbsp;the&nbsp;algorithm.&nbsp;(Available:&nbsp;Train/Test)<br>
+param&nbsp;--model:&nbsp;Filename&nbsp;to&nbsp;save/load&nbsp;the&nbsp;trained&nbsp;model.<br>
+param&nbsp;--evaluate:&nbsp;Run&nbsp;evaluation&nbsp;test&nbsp;in&nbsp;order&nbsp;to&nbsp;propose&nbsp;missing&nbsp;thresholds.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;all&nbsp;thresholds&nbsp;are&nbsp;set&nbsp;by&nbsp;user,&nbsp;evaluation&nbsp;is&nbsp;not&nbsp;required.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In&nbsp;case&nbsp;that&nbsp;some&nbsp;thresholds&nbsp;are&nbsp;not&nbsp;set&nbsp;and&nbsp;evaluation&nbsp;is&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;disabled,&nbsp;non-set&nbsp;thresholds&nbsp;will&nbsp;be&nbsp;set&nbsp;with&nbsp;default&nbsp;values.<br>
+param&nbsp;--thresholds_file:&nbsp;Filename,&nbsp;where&nbsp;thresholds&nbsp;are&nbsp;saved/loaded&nbsp;in&nbsp;JSON&nbsp;format.<br>
+param&nbsp;--influx_host:&nbsp;Host&nbsp;IP&nbsp;of&nbsp;InfluxDB.<br>
+param&nbsp;--influx_port:&nbsp;Port&nbsp;InfluxDB&nbsp;is&nbsp;listening.<br>
+param&nbsp;--influx_user:&nbsp;InfluxDB&nbsp;username.<br>
+param&nbsp;--influx_pass:&nbsp;InfluxDB&nbsp;user's&nbsp;password.<br>
+param&nbsp;--influx_db:&nbsp;InfluxDB&nbsp;database,&nbsp;where&nbsp;metrics&nbsp;and&nbsp;anomalies&nbsp;are&nbsp;stored.<br>
+param&nbsp;--influx_measurement:&nbsp;InfluxDB&nbsp;measurement&nbsp;in&nbsp;influx_db&nbsp;where&nbsp;anomalies&nbsp;are&nbsp;stored.<br>
+&nbsp;<br>
+&nbsp;<br>
+Mode:&nbsp;Train<br>
+Deep&nbsp;Learning&nbsp;model&nbsp;must&nbsp;be&nbsp;trained&nbsp;with&nbsp;a&nbsp;dataset&nbsp;containing&nbsp;normal&nbsp;records.&nbsp;<br>
+Training&nbsp;data&nbsp;have&nbsp;been&nbsp;collected&nbsp;from&nbsp;both&nbsp;Prometheus&nbsp;and&nbsp;Amarisoft&nbsp;exporter.<br>
+-----&nbsp;Preprocessing&nbsp;-----&nbsp;<br>
+Because&nbsp;of&nbsp;these&nbsp;two&nbsp;different&nbsp;systems&nbsp;there&nbsp;is&nbsp;a&nbsp;small&nbsp;difference&nbsp;in&nbsp;timestamps<br>
+for&nbsp;these&nbsp;metrics.&nbsp;For&nbsp;this&nbsp;reason&nbsp;the&nbsp;training&nbsp;dataset&nbsp;is&nbsp;resampled&nbsp;every&nbsp;<br>
+15&nbsp;seconds,&nbsp;to&nbsp;synchronize&nbsp;records&nbsp;from&nbsp;these&nbsp;two&nbsp;systems.&nbsp;<br>
+For&nbsp;training&nbsp;the&nbsp;following&nbsp;features&nbsp;have&nbsp;been&nbsp;selected:&nbsp;CPU&nbsp;percentage&nbsp;rate,&nbsp;<br>
+RAM&nbsp;percentage&nbsp;rate,&nbsp;RX/TX&nbsp;CPU&nbsp;percentage&nbsp;rate,&nbsp;rate&nbsp;of&nbsp;transmitted/received&nbsp;<br>
+bytes&nbsp;and&nbsp;rate&nbsp;of&nbsp;bytes&nbsp;downloaded/uploaded&nbsp;from&nbsp;5G&nbsp;interface.<br>
+These&nbsp;features&nbsp;will&nbsp;be&nbsp;used&nbsp;normalized&nbsp;using&nbsp;Min-Max&nbsp;Normalization.&nbsp;The&nbsp;min&nbsp;&amp;&nbsp;max<br>
+values&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;normalization&nbsp;will&nbsp;be&nbsp;saved&nbsp;in&nbsp;a&nbsp;JSON&nbsp;file.&nbsp;After<br>
+resampling&nbsp;and&nbsp;normalization&nbsp;the&nbsp;dataset&nbsp;is&nbsp;splitted&nbsp;in&nbsp;sequences,&nbsp;based&nbsp;on&nbsp;a&nbsp;<br>
+number&nbsp;of&nbsp;steps&nbsp;parameter.&nbsp;This&nbsp;parameters&nbsp;is&nbsp;set&nbsp;to&nbsp;4,&nbsp;which&nbsp;means&nbsp;that&nbsp;for&nbsp;each&nbsp;<br>
+bunch&nbsp;of&nbsp;4&nbsp;records,&nbsp;the&nbsp;first&nbsp;3&nbsp;will&nbsp;be&nbsp;used&nbsp;as&nbsp;historical&nbsp;data&nbsp;for&nbsp;the&nbsp;algorithm,&nbsp;<br>
+and&nbsp;the&nbsp;fourth&nbsp;is&nbsp;the&nbsp;one&nbsp;that&nbsp;must&nbsp;be&nbsp;predicted.<br>
+-----&nbsp;Training&nbsp;-----&nbsp;<br>
+For&nbsp;training&nbsp;the&nbsp;architecture&nbsp;of&nbsp;an&nbsp;autoencoder&nbsp;has&nbsp;been&nbsp;used.&nbsp;Model&nbsp;consisted&nbsp;of<br>
+9&nbsp;Biderectional&nbsp;LSTM&nbsp;layers&nbsp;and&nbsp;one&nbsp;Dense&nbsp;layer&nbsp;at&nbsp;the&nbsp;end.&nbsp;As&nbsp;activation&nbsp;function<br>
+ReLu&nbsp;is&nbsp;used.&nbsp;SGD&nbsp;with&nbsp;Nesterov&nbsp;momentum&nbsp;has&nbsp;been&nbsp;used&nbsp;as&nbsp;optimizer,&nbsp;with&nbsp;learning&nbsp;<br>
+rate&nbsp;equal&nbsp;to&nbsp;0.01.&nbsp;A&nbsp;part&nbsp;of&nbsp;the&nbsp;trainset&nbsp;will&nbsp;be&nbsp;used&nbsp;as&nbsp;validation&nbsp;set.&nbsp;By&nbsp;default&nbsp;<br>
+it&nbsp;is&nbsp;10%&nbsp;of&nbsp;the&nbsp;training&nbsp;set.<br>
+-----&nbsp;Evaluation&nbsp;-----&nbsp;<br>
+If&nbsp;evaluation&nbsp;is&nbsp;enabled,&nbsp;trained&nbsp;model&nbsp;will&nbsp;be&nbsp;loaded&nbsp;and&nbsp;used&nbsp;for&nbsp;testing&nbsp;in&nbsp;<br>
+three&nbsp;different&nbsp;datasets.&nbsp;The&nbsp;first&nbsp;dataset&nbsp;has&nbsp;been&nbsp;collected&nbsp;during&nbsp;a&nbsp;CPU&nbsp;<br>
+stress&nbsp;test&nbsp;attack.&nbsp;The&nbsp;second&nbsp;dataset&nbsp;has&nbsp;been&nbsp;collected&nbsp;during&nbsp;an&nbsp;iperf&nbsp;stress<br>
+test&nbsp;attack.&nbsp;The&nbsp;third&nbsp;dataset&nbsp;is&nbsp;the&nbsp;training&nbsp;set.&nbsp;All&nbsp;these&nbsp;datasets&nbsp;will&nbsp;be&nbsp;<br>
+normalized&nbsp;with&nbsp;saved&nbsp;normalization&nbsp;values&nbsp;during&nbsp;training.&nbsp;Using&nbsp;these&nbsp;datasets&nbsp;<br>
+the&nbsp;RMSE&nbsp;error&nbsp;between&nbsp;the&nbsp;actual&nbsp;and&nbsp;predicted&nbsp;values&nbsp;will&nbsp;be&nbsp;calculated.&nbsp;<br>
+Network&nbsp;features'&nbsp;thresholds,&nbsp;will&nbsp;be&nbsp;not&nbsp;affected&nbsp;from&nbsp;CPU&nbsp;stress&nbsp;dataset,&nbsp;and&nbsp;<br>
+CPU&nbsp;features'&nbsp;thresholds,&nbsp;will&nbsp;be&nbsp;not&nbsp;affected&nbsp;from&nbsp;iperf&nbsp;stress&nbsp;dataset.&nbsp;The&nbsp;<br>
+99th&nbsp;percentile&nbsp;of&nbsp;each&nbsp;feature's&nbsp;RMSE&nbsp;will&nbsp;be&nbsp;considered&nbsp;as&nbsp;threshold&nbsp;from&nbsp;<br>
+anomaly&nbsp;detection&nbsp;algorithm.&nbsp;The&nbsp;99th&nbsp;percentile&nbsp;has&nbsp;been&nbsp;selected&nbsp;compared&nbsp;with&nbsp;<br>
+the&nbsp;max&nbsp;value,&nbsp;in&nbsp;order&nbsp;to&nbsp;avoid&nbsp;outliers,&nbsp;that&nbsp;may&nbsp;exist&nbsp;in&nbsp;these&nbsp;datasets.&nbsp;<br>
+User-defined&nbsp;thresholds&nbsp;will&nbsp;not&nbsp;be&nbsp;updated&nbsp;from&nbsp;calculated&nbsp;RMSEs.<br>
+&nbsp;<br>
+&nbsp;<br>
+Mode:&nbsp;Test<br>
+Trained&nbsp;Model&nbsp;will&nbsp;be&nbsp;used&nbsp;in&nbsp;order&nbsp;to&nbsp;predict&nbsp;the&nbsp;next&nbsp;features'&nbsp;values&nbsp;in&nbsp;the&nbsp;<br>
+time&nbsp;series.&nbsp;Because&nbsp;it&nbsp;is&nbsp;trained&nbsp;in&nbsp;normal&nbsp;traffic&nbsp;it&nbsp;will&nbsp;predict&nbsp;these&nbsp;values&nbsp;<br>
+considering&nbsp;that&nbsp;the&nbsp;incoming&nbsp;traffic&nbsp;is&nbsp;normal.&nbsp;If&nbsp;the&nbsp;RMSE&nbsp;between&nbsp;the&nbsp;predicted&nbsp;<br>
+and&nbsp;actual&nbsp;value&nbsp;is&nbsp;above&nbsp;a&nbsp;set&nbsp;threshold&nbsp;this&nbsp;record&nbsp;will&nbsp;be&nbsp;considered&nbsp;as&nbsp;anomaly.&nbsp;<br>
+Algorithm&nbsp;fetches&nbsp;the&nbsp;last&nbsp;record&nbsp;from&nbsp;an&nbsp;InfluxDB&nbsp;every&nbsp;15&nbsp;seconds.&nbsp;For&nbsp;predicting&nbsp;<br>
+the&nbsp;next&nbsp;value&nbsp;a&nbsp;sliding&nbsp;time&nbsp;window&nbsp;has&nbsp;been&nbsp;used,&nbsp;keeping&nbsp;only&nbsp;the&nbsp;last&nbsp;n&nbsp;records.&nbsp;<br>
+By&nbsp;default&nbsp;this&nbsp;n&nbsp;is&nbsp;set&nbsp;to&nbsp;be&nbsp;equal&nbsp;to&nbsp;30.&nbsp;Fetched&nbsp;records&nbsp;are&nbsp;been&nbsp;preprocessed&nbsp;<br>
+and&nbsp;normalized&nbsp;before&nbsp;used&nbsp;by&nbsp;the&nbsp;model&nbsp;for&nbsp;predicting.&nbsp;After&nbsp;prediction&nbsp;the&nbsp;RMSes&nbsp;<br>
+between&nbsp;the&nbsp;actual&nbsp;and&nbsp;predicted&nbsp;values&nbsp;are&nbsp;calculated&nbsp;and&nbsp;compared&nbsp;with&nbsp;set&nbsp;thresholds,&nbsp;<br>
+to&nbsp;identify&nbsp;if&nbsp;the&nbsp;record&nbsp;considers&nbsp;an&nbsp;anomaly&nbsp;or&nbsp;not.&nbsp;A&nbsp;possible&nbsp;cause&nbsp;of&nbsp;the&nbsp;anomaly&nbsp;<br>
+is&nbsp;also&nbsp;saved&nbsp;in&nbsp;the&nbsp;database&nbsp;with&nbsp;the&nbsp;detected&nbsp;anomalies&nbsp;or&nbsp;a&nbsp;'unknown&nbsp;cause'&nbsp;message&nbsp;<br>
+if&nbsp;the&nbsp;cause&nbsp;cannot&nbsp;be&nbsp;identified.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="argparse.html">argparse</a><br>
+<a href="logging.html">logging</a><br>
+</td><td width="25%" valign=top><a href="math.html">math</a><br>
+<a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="ntpath.html">ntpath</a><br>
+<a href="pandas.html">pandas</a><br>
+</td><td width="25%" valign=top><a href="tensorflow.html">tensorflow</a><br>
+<a href="time.html">time</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-evaluate"><strong>evaluate</strong></a>(thresholds_file, cpu_testset, iperf_testset, trainset, time_window_threshold)</dt><dd><tt>Evaluate&nbsp;trained&nbsp;model.&nbsp;If&nbsp;user&nbsp;has&nbsp;not&nbsp;set&nbsp;all&nbsp;thresholds&nbsp;for&nbsp;anomalies,&nbsp;evaluation&nbsp;will&nbsp;also&nbsp;set<br>
+the&nbsp;remaining&nbsp;thresholds.&nbsp;Evaluation&nbsp;uses&nbsp;a&nbsp;dataset,&nbsp;that&nbsp;contains&nbsp;a&nbsp;CPU&nbsp;stress&nbsp;test,&nbsp;an&nbsp;iperf&nbsp;<br>
+stress&nbsp;test&nbsp;and&nbsp;predicting&nbsp;the&nbsp;data&nbsp;used&nbsp;for&nbsp;training.&nbsp;Thresholds&nbsp;are&nbsp;defined&nbsp;by&nbsp;calculating&nbsp;the&nbsp;<br>
+RMSEs&nbsp;from&nbsp;actual&nbsp;values&nbsp;and&nbsp;taking&nbsp;the&nbsp;99th&nbsp;percentile&nbsp;of&nbsp;these&nbsp;errors&nbsp;for&nbsp;each&nbsp;feature&nbsp;separately&nbsp;and&nbsp;overall.<br>
+If&nbsp;user&nbsp;has&nbsp;set&nbsp;all&nbsp;thresholds&nbsp;when&nbsp;starting&nbsp;the&nbsp;program,these&nbsp;thresholds&nbsp;will&nbsp;be&nbsp;used.<br>
+&nbsp;<br>
+param&nbsp;thresholds_file:&nbsp;File,&nbsp;where&nbsp;user-defined&nbsp;thresholds&nbsp;are&nbsp;saved.&nbsp;This&nbsp;will&nbsp;updated&nbsp;if&nbsp;new&nbsp;thresholds&nbsp;are&nbsp;proposed.<br>
+param&nbsp;cpu_testset:&nbsp;File&nbsp;containing&nbsp;dataset&nbsp;with&nbsp;CPU&nbsp;stress&nbsp;test.<br>
+param&nbsp;iperf_testset:&nbsp;File&nbsp;containing&nbsp;dataset&nbsp;with&nbsp;iperf&nbsp;stress&nbsp;test.<br>
+param&nbsp;trainset:&nbsp;File&nbsp;containing&nbsp;the&nbsp;dataset&nbsp;used&nbsp;for&nbsp;training.<br>
+param&nbsp;time_window_threshold:&nbsp;Time&nbsp;window&nbsp;for&nbsp;keeping&nbsp;the&nbsp;last-n&nbsp;records.&nbsp;In&nbsp;evaluation&nbsp;data&nbsp;are&nbsp;predicted&nbsp;in&nbsp;batches&nbsp;of&nbsp;n.<br>
+&nbsp;<br>
+return:&nbsp;None.</tt></dd></dl>
+ <dl><dt><a name="-seed"><strong>seed</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of <a href="numpy.random.mtrand.html#RandomState">numpy.random.mtrand.RandomState</a> instance</font></font></dt><dd><tt><a href="#-seed">seed</a>(self,&nbsp;seed=None)<br>
+&nbsp;<br>
+Reseed&nbsp;a&nbsp;legacy&nbsp;MT19937&nbsp;BitGenerator<br>
+&nbsp;<br>
+Notes<br>
+-----<br>
+This&nbsp;is&nbsp;a&nbsp;convenience,&nbsp;legacy&nbsp;function.<br>
+&nbsp;<br>
+The&nbsp;best&nbsp;practice&nbsp;is&nbsp;to&nbsp;**not**&nbsp;reseed&nbsp;a&nbsp;BitGenerator,&nbsp;rather&nbsp;to<br>
+recreate&nbsp;a&nbsp;new&nbsp;one.&nbsp;This&nbsp;method&nbsp;is&nbsp;here&nbsp;for&nbsp;legacy&nbsp;reasons.<br>
+This&nbsp;example&nbsp;demonstrates&nbsp;best&nbsp;practice.<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;from&nbsp;numpy.random&nbsp;import&nbsp;MT19937<br>
+&gt;&gt;&gt;&nbsp;from&nbsp;numpy.random&nbsp;import&nbsp;RandomState,&nbsp;SeedSequence<br>
+&gt;&gt;&gt;&nbsp;rs&nbsp;=&nbsp;RandomState(MT19937(SeedSequence(123456789)))<br>
+#&nbsp;Later,&nbsp;you&nbsp;want&nbsp;to&nbsp;restart&nbsp;the&nbsp;stream<br>
+&gt;&gt;&gt;&nbsp;rs&nbsp;=&nbsp;RandomState(MT19937(SeedSequence(987654321)))</tt></dd></dl>
+ <dl><dt><a name="-sqrt"><strong>sqrt</strong></a>(x, /)</dt><dd><tt>Return&nbsp;the&nbsp;square&nbsp;root&nbsp;of&nbsp;x.</tt></dd></dl>
+ <dl><dt><a name="-train"><strong>train</strong></a>(train_dataset, n_steps, n_features, train_epochs=10, val_split=0.1, train_verbose=1, model_filename='model/5g_edge_autoencoder.h5')</dt><dd><tt>Train&nbsp;DL&nbsp;model.<br>
+&nbsp;<br>
+param&nbsp;train_dataset:&nbsp;Dataset,&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;training&nbsp;model.<br>
+param&nbsp;n_steps:&nbsp;How&nbsp;many&nbsp;previous&nbsp;steps&nbsp;in&nbsp;sequence&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;training.<br>
+param&nbsp;n_features:&nbsp;Number&nbsp;of&nbsp;features&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;training.<br>
+param&nbsp;train_epochs:&nbsp;Epochs&nbsp;to&nbsp;train&nbsp;the&nbsp;model.&nbsp;(Default:&nbsp;10)<br>
+param&nbsp;val_split:&nbsp;Percentage&nbsp;of&nbsp;training&nbsp;dataset&nbsp;to&nbsp;use&nbsp;as&nbsp;validation&nbsp;dataset.&nbsp;(Values:&nbsp;0.0&nbsp;-&nbsp;1.0)&nbsp;(Default:&nbsp;0.1)<br>
+param&nbsp;train_verbose:&nbsp;Show&nbsp;output&nbsp;of&nbsp;training.&nbsp;(Values:&nbsp;0,&nbsp;1,&nbsp;2)&nbsp;(Default:&nbsp;1)<br>
+param&nbsp;model_filename:&nbsp;Filename&nbsp;to&nbsp;save&nbsp;trained&nbsp;model.&nbsp;(Default:&nbsp;model/5g_edge_autoencoder.h5)<br>
+&nbsp;<br>
+return:&nbsp;Trained&nbsp;model.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>cpu_testset</strong> = 'data/cpu_attack.csv'<br>
+<strong>data_prefix</strong> = 'data/'<br>
+<strong>iperf_testset</strong> = 'data/iperf_attack.csv'<br>
+<strong>model_prefix</strong> = 'model/'<br>
+<strong>plots_prefix</strong> = 'plots/'<br>
+<strong>stats_json</strong> = 'data/normalization_stats.json'<br>
+<strong>trainset</strong> = 'data/normal.csv'</td></tr></table>
+</body></html>

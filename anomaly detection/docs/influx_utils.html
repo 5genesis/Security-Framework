@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module influx_utils</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>influx_utils</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cthanasis%5Cdesktop%5C5g_anomaly_detection%5Cinflux_utils.py">c:\users\thanasis\desktop\5g_anomaly_detection\influx_utils.py</a></font></td></tr></table>
+    <p><tt>InfluxDB&nbsp;Functions</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="logging.html">logging</a><br>
+</td><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-checkDatabase"><strong>checkDatabase</strong></a>(client, db_name)</dt><dd><tt>Checks&nbsp;if&nbsp;database,&nbsp;where&nbsp;metrics&nbsp;and&nbsp;detected&nbsp;anomalies&nbsp;will&nbsp;be&nbsp;stored,&nbsp;exists.&nbsp;<br>
+If&nbsp;database&nbsp;does&nbsp;not&nbsp;exists,&nbsp;it&nbsp;will&nbsp;be&nbsp;created.&nbsp;Otherwise&nbsp;return&nbsp;with&nbsp;no&nbsp;action.<br>
+&nbsp;<br>
+param&nbsp;client:&nbsp;Influx&nbsp;client.&nbsp;Client&nbsp;must&nbsp;be&nbsp;initialized&nbsp;and&nbsp;connection&nbsp;with&nbsp;Influx&nbsp;must&nbsp;be&nbsp;established.<br>
+param&nbsp;db_name:&nbsp;Database&nbsp;name,&nbsp;where&nbsp;metrics&nbsp;and&nbsp;detected&nbsp;anomalies&nbsp;will&nbsp;be&nbsp;stored.<br>
+&nbsp;<br>
+return:&nbsp;None</tt></dd></dl>
+ <dl><dt><a name="-getLastRecords"><strong>getLastRecords</strong></a>(client, queries, measurements)</dt><dd><tt>Fetches&nbsp;last&nbsp;inserted&nbsp;record&nbsp;for&nbsp;each&nbsp;metric.&nbsp;Executes&nbsp;a&nbsp;list&nbsp;of&nbsp;quesries.<br>
+Each&nbsp;executed&nbsp;query&nbsp;fetches&nbsp;the&nbsp;last&nbsp;inserted&nbsp;record&nbsp;for&nbsp;one&nbsp;measurement.<br>
+&nbsp;<br>
+param&nbsp;client:&nbsp;InfluxDB&nbsp;client&nbsp;object.<br>
+param&nbsp;queries:&nbsp;List&nbsp;of&nbsp;influx&nbsp;queries,&nbsp;that&nbsp;will&nbsp;be&nbsp;executed.<br>
+param&nbsp;mesaurements:&nbsp;list&nbsp;of&nbsp;measurements,&nbsp;that&nbsp;match&nbsp;the&nbsp;queries.<br>
+&nbsp;<br>
+return:&nbsp;data,&nbsp;timestamp<br>
+data:&nbsp;A&nbsp;python&nbsp;dict&nbsp;containing&nbsp;all&nbsp;fetched&nbsp;data.&nbsp;Dict's&nbsp;key&nbsp;is&nbsp;measurement&nbsp;name&nbsp;and&nbsp;value&nbsp;the&nbsp;'value'&nbsp;column&nbsp;of&nbsp;Influx&nbsp;DB.<br>
+timestamp:&nbsp;A&nbsp;common&nbsp;timestamp&nbsp;for&nbsp;all&nbsp;measurements,&nbsp;to&nbsp;synchronize&nbsp;some&nbsp;of&nbsp;them&nbsp;that&nbsp;are&nbsp;inserted&nbsp;with&nbsp;a&nbsp;delay&nbsp;compared&nbsp;with&nbsp;the&nbsp;rest.</tt></dd></dl>
+ <dl><dt><a name="-initializeConnection"><strong>initializeConnection</strong></a>(influx_host, influx_port, influx_user, influx_pass)</dt><dd><tt>Initialize&nbsp;connection&nbsp;with&nbsp;Influx&nbsp;DB.<br>
+&nbsp;<br>
+IMPORTANT:&nbsp;User&nbsp;must&nbsp;have&nbsp;rights&nbsp;to&nbsp;create&nbsp;a&nbsp;new&nbsp;database.&nbsp;<br>
+If&nbsp;user&nbsp;cannot&nbsp;create&nbsp;new&nbsp;database,&nbsp;detected&nbsp;anomalies&nbsp;will&nbsp;not&nbsp;be&nbsp;inserted&nbsp;in&nbsp;database.<br>
+Database,&nbsp;can&nbsp;also&nbsp;created&nbsp;manually.<br>
+&nbsp;<br>
+param&nbsp;influx_host:&nbsp;Host's&nbsp;IP,&nbsp;where&nbsp;Influx&nbsp;is&nbsp;running.<br>
+param&nbsp;influx_port:&nbsp;Host's&nbsp;port,&nbsp;where&nbsp;Influx&nbsp;service&nbsp;is&nbsp;listening.<br>
+param&nbsp;influx_user:&nbsp;Username&nbsp;for&nbsp;Influx&nbsp;connection.&nbsp;<br>
+param&nbsp;influx_pass:&nbsp;User's&nbsp;password.<br>
+&nbsp;<br>
+return:&nbsp;Influx&nbsp;client&nbsp;object</tt></dd></dl>
+ <dl><dt><a name="-insertAnomalies"><strong>insertAnomalies</strong></a>(client, influx_measurement, timestamps, anomaly_np, tag_msg)</dt><dd><tt>Inserts&nbsp;the&nbsp;detcted&nbsp;anomalies&nbsp;in&nbsp;the&nbsp;defined&nbsp;measurement&nbsp;in&nbsp;Influx&nbsp;DB.<br>
+&nbsp;<br>
+param&nbsp;client:&nbsp;InfluxDB&nbsp;client&nbsp;object.<br>
+param&nbsp;influx_measurement:&nbsp;Measurement,&nbsp;where&nbsp;the&nbsp;anomalies&nbsp;will&nbsp;be&nbsp;stored.&nbsp;It&nbsp;is&nbsp;defined&nbsp;as&nbsp;parameter&nbsp;when&nbsp;the&nbsp;main&nbsp;program&nbsp;starts.<br>
+param&nbsp;timestamps:&nbsp;Timestamp&nbsp;of&nbsp;detected&nbsp;anomaly.<br>
+param&nbsp;anomaly_np:&nbsp;A&nbsp;numpy&nbsp;array,&nbsp;that&nbsp;contains&nbsp;metrics'&nbsp;values&nbsp;for&nbsp;detected&nbsp;anomaly.<br>
+param&nbsp;tag_msg:&nbsp;String,&nbsp;with&nbsp;a&nbsp;possible&nbsp;cause&nbsp;of&nbsp;detected&nbsp;anomalies.&nbsp;If&nbsp;there&nbsp;is&nbsp;no&nbsp;clear&nbsp;cause,&nbsp;its&nbsp;value&nbsp;will&nbsp;be&nbsp;'unknown&nbsp;cause'.&nbsp;<br>
+&nbsp;<br>
+return:&nbsp;None</tt></dd></dl>
+</td></tr></table>
+</body></html>

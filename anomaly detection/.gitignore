@@ -1,0 +1,6 @@
+*.pyc
+__pycache__/*
+.metals/*
+.vscode/*
+5g_anomaly_detection.log
+docs/_5g.txt
