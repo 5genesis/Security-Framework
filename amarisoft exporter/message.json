@@ -1,0 +1,88 @@
+{
+    "message": "stats",
+    "time": 2273.336,
+    "cpu": {
+        "global": 73.97254886394047
+    },
+    "instance_id": "5f579766",
+    "cells": {
+        "1": {
+            "dl_bitrate": 1.70508600,
+            "ul_bitrate": 0,
+            "dl_tx": 0,
+            "ul_tx": 0,
+            "dl_retx": 0,
+            "ul_retx": 0,
+            "dl_use_min": 0,
+            "dl_use_max": 0.14000000059604645,
+            "dl_use_avg": 0.007501554729338121,
+            "ul_use_min": 0.11999999731779099,
+            "ul_use_max": 0.23999999463558197,
+            "ul_use_avg": 0.13200307025771124,
+            "dl_sched_users_min": 0,
+            "dl_sched_users_max": 0,
+            "dl_sched_users_avg": 0,
+            "ul_sched_users_min": 0,
+            "ul_sched_users_max": 0,
+            "ul_sched_users_avg": 0,
+            "ue_count_min": 0,
+            "ue_count_max": 0,
+            "ue_count_avg": 0,
+            "erab_count_min": 0,
+            "erab_count_max": 0,
+            "erab_count_avg": 0,
+            "dl_gbr_use_min": 0,
+            "dl_gbr_use_max": 0,
+            "dl_gbr_use_avg": 0,
+            "ul_gbr_use_min": 0,
+            "ul_gbr_use_max": 0,
+            "ul_gbr_use_avg": 0
+        },
+        "2": {
+            "dl_bitrate": 1.8600938,
+            "ul_bitrate": 0,
+            "dl_tx": 0,
+            "ul_tx": 0,
+            "dl_retx": 0,
+            "ul_retx": 0,
+            "dl_sched_users_min": 0,
+            "dl_sched_users_max": 0,
+            "dl_sched_users_avg": 0,
+            "ul_sched_users_min": 0,
+            "ul_sched_users_max": 0,
+            "ul_sched_users_avg": 0,
+            "ue_count_min": 0,
+            "ue_count_max": 0,
+            "ue_count_avg": 0,
+            "erab_count_min": 0,
+            "erab_count_max": 0,
+            "erab_count_avg": 0
+        }
+    },
+    "rf_ports": {
+        "0": {
+            "rxtx_delay": {
+                "min": 2.6256944444444446,
+                "max": 3.740017361111111,
+                "avg": 3.177789185664072,
+                "sd": 0.27901079826455977
+            }
+        },
+        "1": {
+            "rxtx_delay": {
+                "min": 3.1759765625,
+                "max": 3.92080078125,
+                "avg": 3.512751080085515,
+                "sd": 0.14324638940486537
+            }
+        }
+    },
+    "counters": {
+        "messages": {
+            "s1_setup_request": 1,
+            "s1_setup_response": 1
+        },
+        "errors": {}
+    },
+    "message_id": "id#1"
+}
