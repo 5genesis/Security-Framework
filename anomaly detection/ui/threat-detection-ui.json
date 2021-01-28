@@ -838,7 +838,7 @@
           "link": true,
           "linkTargetBlank": true,
           "linkTooltip": "Open Anomaly (New Tab)",
-          "linkUrl": "d/HJtXjcvGz/threat-detection-sph?orgId=1&from=${__cell_0}",
+          "linkUrl": "d/HJtXjcvGz/threat-detection-sph?orgId=1&time=${__cell_0}&time.window=120000",
           "pattern": "Time",
           "type": "date"
         },
@@ -1072,7 +1072,7 @@
     "list": []
   },
   "time": {
-    "from": "2020-09-04T12:06:34.578Z",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -1092,5 +1092,5 @@
   "timezone": "",
   "title": "Threat detection (SPH)",
   "uid": "HJtXjcvGz",
-  "version": 56
+  "version": 58
 }
