@@ -1,8 +1,14 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"time"
+
+	"github.com/5genesis/Security-Framework/amarisoft-exporter/utils"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -68,6 +74,22 @@ var (
 
 func main() {
 
+	//initialize our setup
+	c := utils.Config{}
+	c.Setup()
+
+	//parse flags
+	flag.Parse()
+
+	//read config file passed
+	b, _ := ioutil.ReadFile(c.GetPath())
+
+	//unmarshall yml conf file
+	y, err := utils.UnmarshalAll(string(b))
+	if err != nil {
+		panic(err)
+	}
+
 	http.Handle("/metrics", promhttp.HandlerFor(
 		reg,
 		promhttp.HandlerOpts{
@@ -75,7 +97,14 @@ func main() {
 			EnableOpenMetrics: true,
 		}))
 
-	go Exporter()
-	fmt.Println("Listening on port :3333")
-	panic(http.ListenAndServe(":3333", nil))
+	//check interval is acceptable
+	t, err := time.ParseDuration(y.Interval)
+	if err != nil {
+		log.Println("unable to parse interval from config yml")
+		return
+	}
+
+	go Exporter(y.Url, t)
+	fmt.Println("Listening on port :" + y.Port)
+	panic(http.ListenAndServe(":"+y.Port, nil))
 }

@@ -25,7 +25,7 @@ func catchSig(ch chan os.Signal, c *websocket.Conn) {
 }
 
 // Exporter gathers metrics from Amarisoft socket api
-func Exporter() {
+func Exporter(u string, t time.Duration) {
 
 	// connect the os signal to our channel
 	// interrupt := make(chan os.Signal, 1)
@@ -36,7 +36,7 @@ func Exporter() {
 	//signal.Notify(interrupt, os.Interrupt)
 
 	// use the ws:// Scheme to connect to the websocket
-	u := "ws://192.168.137.10:9001/"
+	//u := "ws://192.168.137.10:9001/"
 	println("connecting to %s", u)
 
 	c, _, err := websocket.DefaultDialer.Dial(u, http.Header{"origin": []string{"Test"}})
@@ -51,7 +51,8 @@ func Exporter() {
 	//call Amarisoft Socket Api every 10 sec
 	for {
 		callAmariSocket(c)
-		time.Sleep(10 * time.Second)
+		time.Sleep(t)
+		//time.Sleep(10 * time.Second)
 	}
 
 	// in case Close fails we return the error
