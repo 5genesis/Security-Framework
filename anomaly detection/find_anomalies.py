@@ -191,13 +191,20 @@ def train(train_dataset, n_steps, n_features, train_epochs=10, val_split=0.1, tr
         X, y, 
         epochs=train_epochs, 
         validation_split=val_split, 
-        verbose=train_verbose
+        verbose=1
     )
     
     logging.info(model.summary())
 
     logging.info('Saving trained model to file ' + model_filename)
     model.save(model_filename)
+
+    logging.info('Saving trained model in json format in file ' + model_prefix + '5g_autoencoder.json')
+    with open(model_prefix + '5g_autoencoder.json', "w") as file:
+        file.write(model.to_json())
+    
+    logging.info('Saving model weights in file ' + model_prefix + '5g_autoencoder_weights.h5')
+    model.save_weights(model_prefix + '5g_autoencoder_weights.h5')
 
     plotMetric(history, 'loss', plots_prefix)
     plotMetric(history, 'acc', plots_prefix)
@@ -261,6 +268,7 @@ def evaluate(thresholds_file, cpu_testset, iperf_testset, trainset, time_window_
 
     logging.info('Evaluating for CPU and memory metrics')
 
+    sequences = []
     for sample_start in range(0, len(cpu_df)-time_window_threshold):
         sample_end = sample_start + time_window_threshold
         cpu_df_sample = cpu_df.iloc[sample_start:sample_end]
@@ -277,6 +285,8 @@ def evaluate(thresholds_file, cpu_testset, iperf_testset, trainset, time_window_
 
         cpu_rmse_dict = printPredictionErrors(y_test_cpu, yhat_cpu)
 
+        sequences.append(len(sequences))
+
         total_rmse.append(cpu_rmse_dict['rmse_total'])
         cpu_rmse.append(cpu_rmse_dict['cpu_rmse'])
         cpu_rx_rmse.append(cpu_rmse_dict['cpu_rx_rmse'])
@@ -285,6 +295,7 @@ def evaluate(thresholds_file, cpu_testset, iperf_testset, trainset, time_window_
 
     logging.info('Evaluating for network and 5G metrics')
 
+    sequences = []
     for sample_start in range(0, len(iperf_df)-time_window_threshold):
         sample_end = sample_start + time_window_threshold
         iperf_df_sample = iperf_df.iloc[sample_start:sample_end]
@@ -301,6 +312,8 @@ def evaluate(thresholds_file, cpu_testset, iperf_testset, trainset, time_window_
 
         iperf_rmse_dict = printPredictionErrors(y_test_iperf, yhat_iperf)
 
+        sequences.append(len(sequences))
+
         total_rmse.append(iperf_rmse_dict['rmse_total'])
         net_down_rmse.append(iperf_rmse_dict['net_down_rmse'])
         net_up_rmse.append(iperf_rmse_dict['net_up_rmse'])
@@ -310,6 +323,7 @@ def evaluate(thresholds_file, cpu_testset, iperf_testset, trainset, time_window_
 
     logging.info('Evaluating with training data')
 
+    sequences = []
     for sample_start in range(0, len(val_df)-time_window_threshold):
         sample_end = sample_start + time_window_threshold
         val_df_sample = val_df.iloc[sample_start:sample_end]
@@ -325,6 +339,8 @@ def evaluate(thresholds_file, cpu_testset, iperf_testset, trainset, time_window_
         yhat_val = model.predict(X_test_val, verbose=0)
 
         val_rmse_dict = printPredictionErrors(y_test_val, yhat_val)
+
+        sequences.append(len(sequences))
 
         total_rmse.append(val_rmse_dict['rmse_total'])
         cpu_rmse.append(val_rmse_dict['cpu_rmse'])
