@@ -44,6 +44,3 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:3333"]
 ```
-
-### License
-TBD
