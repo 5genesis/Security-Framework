@@ -88,6 +88,7 @@ from keras.models import load_model
 from keras.layers import LSTM
 from keras.layers import Dense
 from keras.layers import Bidirectional
+from keras.layers import InputLayer
 from keras.optimizers import SGD
 
 from utils import getFeatures
@@ -168,7 +169,8 @@ def train(train_dataset, n_steps, n_features, train_epochs=10, val_split=0.1, tr
     
     # Model Architecture
     model = Sequential()
-    model.add(Bidirectional(LSTM(64, activation='relu', return_sequences=True, input_shape=(n_steps, n_features))))
+    model.add(InputLayer(input_shape=(n_steps, n_features)))
+    model.add(Bidirectional(LSTM(64, activation='relu', return_sequences=True)))
     model.add(Bidirectional(LSTM(32, activation='relu', return_sequences=True)))
     model.add(Bidirectional(LSTM(16, activation='relu', return_sequences=True)))
     model.add(Bidirectional(LSTM(8, activation='relu', return_sequences=True)))
@@ -198,13 +200,6 @@ def train(train_dataset, n_steps, n_features, train_epochs=10, val_split=0.1, tr
 
     logging.info('Saving trained model to file ' + model_filename)
     model.save(model_filename)
-
-    logging.info('Saving trained model in json format in file ' + model_prefix + '5g_autoencoder.json')
-    with open(model_prefix + '5g_autoencoder.json', "w") as file:
-        file.write(model.to_json())
-    
-    logging.info('Saving model weights in file ' + model_prefix + '5g_autoencoder_weights.h5')
-    model.save_weights(model_prefix + '5g_autoencoder_weights.h5')
 
     plotMetric(history, 'loss', plots_prefix)
     plotMetric(history, 'acc', plots_prefix)
